@@ -8,11 +8,19 @@ import {
   Text,
   VStack,
 } from "native-base";
-import React from "react";
+import React, {useState} from "react";
 import Colors from "../color";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
+import { handleLogin } from './../data/Firebase'
 
 function LoginScreen({ navigation }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleSubmit = () => {
+    handleLogin(email, password);
+    navigation.navigate('Bottom');
+  }
   return (
     <Box flex={1} bg={Colors.black}>
       <Image
@@ -45,6 +53,7 @@ function LoginScreen({ navigation }) {
             type="text"
             color={Colors.main}
             borderBottomColor={Colors.underline}
+            onChangeText={text => setEmail(text)}
           />
           {/* PASSWORD */}
           <Input
@@ -58,6 +67,7 @@ function LoginScreen({ navigation }) {
             pl={2}
             color={Colors.main}
             borderBottomColor={Colors.underline}
+            onChangeText={text => setPassword(text)}
           />
         </VStack>
         <Button
@@ -68,7 +78,7 @@ function LoginScreen({ navigation }) {
           w="40%"
           rounded={50}
           bg={Colors.main}
-          onPress={() => navigation.navigate("Bottom")}
+          onPress={handleSubmit}
         >
           LOGIN
         </Button>
@@ -79,5 +89,4 @@ function LoginScreen({ navigation }) {
     </Box>
   );
 }
-
 export default LoginScreen;

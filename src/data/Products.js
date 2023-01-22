@@ -1,7 +1,5 @@
-import firebase from 'firebase';
-
 // Initialize Firebase
-const firebaseConfig = {
+/*const firebaseConfig = {
   apiKey: "AIzaSyAxuiWq9FeGiH7ZqrzWOZ9iSa-IR_YBTSc",
   authDomain: "scamonline-d6d49.firebaseapp.com",
   projectId: "scamonline-d6d49",
@@ -18,9 +16,10 @@ const productsRef = firebase.database().ref('product');
 productsRef.on('name','image','description','price','countInStock', (snapshot) => {
   const products = snapshot.val();
   console.log(products);
-});
+});*/
 
-/*const products = [
+
+const products = [
   {
     _id: "1",
     name: "Telefon v1",
@@ -103,5 +102,5 @@ productsRef.on('name','image','description','price','countInStock', (snapshot) =
     rating: 3,
     numReviews: 4,
   },
-];*/
+];
 export default products;

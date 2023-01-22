@@ -9,11 +9,21 @@ import {
   View,
   VStack,
 } from "native-base";
-import React from "react";
+import React, {useState} from "react";
 import { MaterialIcons, FontAwesome, Ionicons } from "@expo/vector-icons";
 import Colors from "../color";
+import { handleRegister } from './../data/Firebase'
 
 function RegisterScreen({ navigation }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
+
+  const handleSubmit = async () => {
+    await handleRegister(email, password, username);
+    navigation.navigate('Bottom');
+  }
+
   return (
     <Box flex={1} bg={Colors.black}>
       <Image
@@ -46,6 +56,7 @@ function RegisterScreen({ navigation }) {
             type="text"
             color={Colors.main}
             borderBottomColor={Colors.underline}
+            onChangeText={text => setUsername(text)}
           />
           {/* EMAIL */}
           <Input
@@ -59,6 +70,7 @@ function RegisterScreen({ navigation }) {
             type="text"
             color={Colors.main}
             borderBottomColor={Colors.underline}
+            onChangeText={text => setEmail(text)}
           />
           {/* PASSWORD */}
           <Input
@@ -72,6 +84,7 @@ function RegisterScreen({ navigation }) {
             pl={2}
             color={Colors.main}
             borderBottomColor={Colors.underline}
+            onChangeText={text => setPassword(text)}
           />
         </VStack>
         <Button
@@ -82,7 +95,7 @@ function RegisterScreen({ navigation }) {
           w="40%"
           rounded={50}
           bg={Colors.main}
-          onPress={() => navigation.navigate("Bottom")}
+          onPress={handleSubmit}
         >
           SIGN UP
         </Button>
