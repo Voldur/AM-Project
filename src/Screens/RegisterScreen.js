@@ -20,8 +20,12 @@ function RegisterScreen({ navigation }) {
   const [username, setUsername] = useState('');
 
   const handleSubmit = async () => {
-    await handleRegister(email, password, username);
-    navigation.navigate('Bottom');
+    const error = await handleRegister(email, password, username);
+    if(error){
+      setError(error);
+    } else {
+      navigation.navigate('Bottom');
+    }
   }
 
   return (

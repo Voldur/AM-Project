@@ -17,9 +17,13 @@ function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSubmit = () => {
-    handleLogin(email, password);
-    navigation.navigate('Bottom');
+  const handleSubmit = async () => {
+    const error = await handleLogin(email, password);
+    if(error){
+      setError(error);
+    } else {
+      navigation.navigate('Bottom');
+    }
   }
   return (
     <Box flex={1} bg={Colors.black}>

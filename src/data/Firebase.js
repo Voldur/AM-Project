@@ -23,11 +23,15 @@ export const handleLogin = async (email,password) => {
     }
   }
 
-export const handleRegister = async (email,password,username) => {
+  export const handleRegister = async (email,password,username) => {
     try {
-      const { user } = await firebase.auth().createUserWithEmailAndPassword(email, password);
-      await user.updateProfile({ displayName: username });
+        const signInMethods = await firebase.auth().fetchSignInMethodsForEmail(email);
+        if (signInMethods.length) {
+            throw new Error("Email already in use.");
+        }
+        const { user } = await firebase.auth().createUserWithEmailAndPassword(email, password);
+        await user.updateProfile({ displayName: username });
     } catch (error) {
-      console.log(error)
+      return error.message
     }
   }
