@@ -1,20 +1,26 @@
-import {
-  Box,
-  Flex,
-  Heading,
-  Image,
-  Pressable,
-  ScrollView,
-  Text,
-} from "native-base";
+import { useEffect, useState } from 'react';
+import { fetchProducts } from './../data/Firebase';
+import { Box, Flex, Heading, Image, Pressable, ScrollView, Text } from "native-base";
 import React from "react";
-import products from "../data/Products";
 import Colors from "../color";
-import Rating from "./Rating";
 import { useNavigation } from "@react-navigation/native";
 
-function HomeProducts() {
+function HomeProducts({ searchValue }) {
+  const [products, setProducts] = useState([]);
   const navigation = useNavigation();
+  
+  useEffect(() => {
+    async function fetchData() {
+        const fetchedProducts = await fetchProducts();
+        setProducts(fetchedProducts);
+    }
+    fetchData();
+  }, []);
+
+  const filteredProducts = searchValue.length > 0 ? products.filter((product) => {
+    return product.name.toLowerCase().includes(searchValue.toLowerCase());
+  }) : products;
+
   return (
     <ScrollView flex={1} showsVerticalScrollIndicator={false}>
       <Flex
@@ -23,7 +29,7 @@ function HomeProducts() {
         justifyContent="space-between"
         px={6}
       >
-        {products.map((product) => (
+        {filteredProducts.map((product) => (
           <Pressable
             onPress={() => navigation.navigate("Single", product)}
             key={product._id}
@@ -51,8 +57,6 @@ function HomeProducts() {
               <Text fontSize={10} mt={1} isTruncated w="full">
                 {product.name}
               </Text>
-              {/* <Rating value={product.rating} /> */}
-              
             </Box>
           </Pressable>
         ))}

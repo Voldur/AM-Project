@@ -1,5 +1,7 @@
-// Initialize Firebase
-/*const firebaseConfig = {
+/*import firebase from 'firebase/app';
+import 'firebase/database';
+
+const firebaseConfig = {
   apiKey: "AIzaSyAxuiWq9FeGiH7ZqrzWOZ9iSa-IR_YBTSc",
   authDomain: "scamonline-d6d49.firebaseapp.com",
   projectId: "scamonline-d6d49",
@@ -7,16 +9,11 @@
   messagingSenderId: "840314796661",
   appId: "1:840314796661:web:94a81659c9b1ac0445d63c"
 };
+
 firebase.initializeApp(firebaseConfig);
 
-// Reference to the products node in your Firebase database
 const productsRef = firebase.database().ref('product');
 
-// Retrieve the data from Firebase
-productsRef.on('name','image','description','price','countInStock', (snapshot) => {
-  const products = snapshot.val();
-  console.log(products);
-});*/
 
 
 const products = [
@@ -103,4 +100,7 @@ const products = [
     numReviews: 4,
   },
 ];
-export default products;
+
+products.forEach((product) => {
+  productsRef.push(product);
+});*/

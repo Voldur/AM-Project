@@ -1,6 +1,7 @@
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/database';
+import 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: "AIzaSyAxuiWq9FeGiH7ZqrzWOZ9iSa-IR_YBTSc",
@@ -13,7 +14,7 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
-export const productsRef = firebase.database().ref('product');
+const db = firebase.firestore();
 
 export const handleLogin = async (email,password) => {
     try {
@@ -35,3 +36,24 @@ export const handleLogin = async (email,password) => {
       return error.message
     }
   }
+
+const productsRef = db.collection('product');
+
+export const fetchProducts = async () => {
+    let products = [];
+    await productsRef.get().then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+            products.push(doc.data());
+        });
+    });
+    return products;
+}
+
+export default firebase;
+
+// TESTING CONNECTION WITH FIREBASE
+/*productsRef.get().then(snapshot => {
+    snapshot.forEach(doc => {
+        console.log(doc.id, '=>', doc.data());
+    });
+});*/

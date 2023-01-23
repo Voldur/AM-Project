@@ -24,6 +24,7 @@ function SingleProductScreen({ route }) {
     <Box safeArea flex={1} bg={Colors.white}>
       <ScrollView px={5} showsVerticalScrollIndicator={false}>
         <Image
+          mt={5}
           source={{ uri: product.image }}
           alt="Image"
           w="full"
@@ -35,7 +36,6 @@ function SingleProductScreen({ route }) {
         </Heading>
         {/*<Rating value={product.rating} text={`${product.numReviews} reviews`} />*/}
         <HStack space={2} alignItems="center" my={5}>
-          {product.countInStock > 0 ? (
             <NumericInput
               value={value}
               totalWidth={140}
@@ -51,12 +51,6 @@ function SingleProductScreen({ route }) {
               rightButtonBackgroundColor={Colors.main}
               leftButtonBackgroundColor={Colors.main}
             />
-          ) : (
-            <Heading bold color={Colors.red} italic fontSize={12}>
-              Out of stock
-            </Heading>
-          )}
-
           <Spacer />
           <Heading bold color={Colors.black} fontSize={19}>
             {product.price} PLN
