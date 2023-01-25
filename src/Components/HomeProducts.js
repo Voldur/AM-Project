@@ -8,7 +8,7 @@ import { useNavigation } from "@react-navigation/native";
 function HomeProducts({ searchValue }) {
   const [products, setProducts] = useState([]);
   const navigation = useNavigation();
-  
+
   useEffect(() => {
     async function fetchData() {
         const fetchedProducts = await fetchProducts();

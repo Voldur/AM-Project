@@ -14,12 +14,24 @@ import Rating from "../Components/Rating";
 import NumericInput from "react-native-numeric-input";
 import Buttone from "../Components/Buttone";
 import Review from "../Components/Review";
+import { handleAddToCart } from '../data/Firebase';
 import { useNavigation } from "@react-navigation/native";
 
 function SingleProductScreen({ route }) {
   const [value, setValue] = useState(0);
   const navigation = useNavigation();
   const product = route.params;
+
+  const addToCart = async () => {
+    const user = await firebase.auth().currentUser;
+    if(user){
+      await handleAddToCart(product.id, value, user.uid);
+    }
+    else{
+      console.log("User not logged in");
+    }
+  }
+
   return (
     <Box safeArea flex={1} bg={Colors.white}>
       <ScrollView px={5} showsVerticalScrollIndicator={false}>
@@ -42,7 +54,6 @@ function SingleProductScreen({ route }) {
               totalHeight={30}
               iconSize={25}
               step={1}
-              maxValue={product.countInStock}
               minValue={0}
               borderColor={Colors.deepGray}
               rounded
@@ -59,8 +70,11 @@ function SingleProductScreen({ route }) {
         <Text lineHeight={24} fontSize={12}>
           {product.description}
         </Text>
-        <Buttone
-          onPress={() => navigation.navigate("Cart")}
+          <Buttone
+          onPress={() => {
+            addToCart();
+            navigation.navigate("Cart");
+          }}
           bg={Colors.main}
           color={Colors.white}
           mt={10}

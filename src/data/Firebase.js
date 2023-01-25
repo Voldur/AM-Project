@@ -15,12 +15,16 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 const db = firebase.firestore();
+const productsRef = db.collection('product');
+const cartsRef = db.collection('cart');
+
 
 export const handleLogin = async (email,password) => {
     try {
       await firebase.auth().signInWithEmailAndPassword(email, password);
     } catch (error) {
       console.log(error)
+      return error.message
     }
   }
 
@@ -32,12 +36,11 @@ export const handleLogin = async (email,password) => {
         }
         const { user } = await firebase.auth().createUserWithEmailAndPassword(email, password);
         await user.updateProfile({ displayName: username });
+        await user.updateProfile({ photoURL: "https://cdn.vox-cdn.com/thumbor/qz69U-p3xQ7BEcfsz9wp-D1PmrI=/0x0:599x399/1400x1400/filters:focal(0x0:599x399):format(jpeg)/cdn.vox-cdn.com/uploads/chorus_image/image/5535551/cnbc_failed_celeb_businesses_hulk.0.jpg" });
     } catch (error) {
       return error.message
     }
   }
-
-const productsRef = db.collection('product');
 
 export const fetchProducts = async () => {
     let products = [];
@@ -49,11 +52,47 @@ export const fetchProducts = async () => {
     return products;
 }
 
-export default firebase;
 
-// TESTING CONNECTION WITH FIREBASE
-/*productsRef.get().then(snapshot => {
-    snapshot.forEach(doc => {
-        console.log(doc.id, '=>', doc.data());
+export const useAuth = () => {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        setUser(user);
+      } else {
+        setUser(null);
+      }
     });
-});*/
+
+    return () => unsubscribe();
+  }, []);
+
+  return user;
+}
+
+export const handleAddToCart = async (productID, quantity, userUID) => {
+  try {
+      // Check if the item is already in the cart
+      const itemRef = cartsRef.doc(productID);
+      const itemSnapshot = await itemRef.get();
+      if (itemSnapshot.exists) {
+          // If the item is already in the cart, update its quantity
+          const currentQuantity = itemSnapshot.data().quantity;
+          await itemRef.update({ quantity: currentQuantity + quantity });
+      } else {
+          // If the item is not in the cart, add a new document
+          await cartsRef.doc(productID).set({
+              productID: productID,
+              quantity: quantity,
+              userUID: userUID
+          });
+      }
+  } catch (error) {
+      console.log(error);
+      return error.message;
+  }
+};
+
+
+export default firebase;

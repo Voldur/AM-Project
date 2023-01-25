@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -10,22 +10,32 @@ import {
   VStack,
 } from "native-base";
 import { SwipeListView } from "react-native-swipe-list-view";
-import products from "../data/Products";
+import { cartsRef, productsRef, fetchProducts } from "../data/Firebase";
 import Colors from "../color";
 import { FontAwesome } from "@expo/vector-icons";
 
-const Swiper = () => (
-  <SwipeListView
-    rightOpenValue={-50}
-    previewRowKey="0"
-    previewOpenValue={-40}
-    previewOpenDelay={3000}
-    data={products.slice(0, 2)}
-    renderItem={renderitem}
-    renderHiddenItem={hiddenItem}
-    showsVerticalScrollIndicator={false}
-  />
-);
+const Swiper = () => {
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    fetchProducts().then(data => {
+      setProducts(data);
+    });
+  }, []);
+
+  return (
+    <SwipeListView
+      rightOpenValue={-50}
+      previewRowKey="0"
+      previewOpenValue={-40}
+      previewOpenDelay={3000}
+      data={products}
+      renderItem={renderitem}
+      renderHiddenItem={hiddenItem}
+      showsVerticalScrollIndindicator={false}
+    />
+  );
+};
 
 // Cart Item
 const renderitem = (data) => (
