@@ -1,7 +1,9 @@
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/database';
+import { doc, setDoc, addDoc, collection } from 'firebase/firestore';
 import 'firebase/firestore';
+import React, { useState, useEffect } from "react";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAxuiWq9FeGiH7ZqrzWOZ9iSa-IR_YBTSc",
@@ -15,8 +17,8 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 const db = firebase.firestore();
-const productsRef = db.collection('product');
-const cartsRef = db.collection('cart');
+export const cartsRef = db.collection('cart');
+export const productsRef = db.collection('product');
 
 
 export const handleLogin = async (email,password) => {
@@ -45,13 +47,21 @@ export const handleLogin = async (email,password) => {
 export const fetchProducts = async () => {
     let products = [];
     await productsRef.get().then((querySnapshot) => {
-        querySnapshot.forEach((doc) => {
-            products.push(doc.data());
-        });
-    });
-    return products;
+      querySnapshot.forEach((doc) => {
+          products.push(doc.data());
+      });
+  });
+  return products;
 }
 
+export const fetchCartItems = async (userUID) => {
+  let cartItems = [];
+  const querySnapshot = await db.collection("cart").where("userUID", "==", userUID).get();
+  querySnapshot.forEach((doc) => {
+    cartItems.push(doc.data());
+  });       
+  return cartItems;
+}
 
 export const useAuth = () => {
   const [user, setUser] = useState(null);
@@ -72,27 +82,35 @@ export const useAuth = () => {
 }
 
 export const handleAddToCart = async (productID, quantity, userUID) => {
-  try {
-      // Check if the item is already in the cart
-      const itemRef = cartsRef.doc(productID);
-      const itemSnapshot = await itemRef.get();
-      if (itemSnapshot.exists) {
-          // If the item is already in the cart, update its quantity
-          const currentQuantity = itemSnapshot.data().quantity;
-          await itemRef.update({ quantity: currentQuantity + quantity });
+  console.log("Fire proid: "+productID+" value: "+quantity+" uuid: "+userUID);
+
+  db.collection("cart")
+    .where("productID", "==", productID)
+    .where("userUID", "==", userUID)
+    .get()
+    .then(querySnapshot => {
+      if (!querySnapshot.empty) {
+        querySnapshot.forEach(doc => {
+          const newQuantity = doc.data().quantity + quantity;
+          doc.ref.update({ quantity: newQuantity });
+        });
+        console.log("Quantity updated successfully");
       } else {
-          // If the item is not in the cart, add a new document
-          await cartsRef.doc(productID).set({
-              productID: productID,
-              quantity: quantity,
-              userUID: userUID
-          });
+        db.collection("cart").add({
+          productID: productID,
+          quantity: quantity,
+          userUID: userUID
+        })
+        .then(() => {
+          console.log("Document Created")
+        })
+        .catch((error) => {
+          console.log(error.message)
+        });
       }
-  } catch (error) {
-      console.log(error);
-      return error.message;
-  }
+    });
 };
 
 
-export default firebase;
+
+export default firebase;          

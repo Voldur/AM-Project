@@ -1,6 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import { Box, Button, Center, HStack, ScrollView, Text } from "native-base";
-import React from "react";
+import React, { useState } from "react";
 import Colors from "../color";
 import Buttone from "../Components/Buttone";
 // import CartEmpty from "../Components/CartEmpty";
@@ -47,7 +47,7 @@ function CartScreen() {
                 bg: Colors.main,
               }}
             >
-              $356
+              356 PLN
             </Button>
           </HStack>
         </Center>

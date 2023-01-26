@@ -1,44 +1,63 @@
 import React, { useState, useEffect } from "react";
+import { SwipeListView } from "react-native-swipe-list-view";
 import {
   Box,
   Button,
-  Center,
-  HStack,
+  Heading,
   Image,
-  Pressable,
+  Center,
+  ScrollView,
+  HStack,
+  View,
+  Spacer,
   Text,
+  Pressable,
   VStack,
 } from "native-base";
-import { SwipeListView } from "react-native-swipe-list-view";
-import { cartsRef, productsRef, fetchProducts } from "../data/Firebase";
-import Colors from "../color";
+import { cartsRef, fetchCartItems, fetchProducts } from "../data/Firebase";
 import { FontAwesome } from "@expo/vector-icons";
+import firebase from 'firebase/app';
+import 'firebase/auth';
+import 'firebase/database';
+import 'firebase/firestore';
+import Colors from "../color";
 
-const Swiper = () => {
-  const [products, setProducts] = useState([]);
+const CartList = (data) => {
+  const currentUser = firebase.auth().currentUser;
+  const [user, setUser] = useState(currentUser);
+  const [cartItems, setCartItems] = useState([]);
+  const [products, setproducts] = useState([]);
 
   useEffect(() => {
-    fetchProducts().then(data => {
-      setProducts(data);
+    fetchCartItems(user.uid).then(data => {
+      setCartItems(data);
     });
   }, []);
 
+  useEffect(() => {
+    if (cartItems.length) {
+      cartItems.map(item => {
+        firebase.firestore().collection('product').where("id", "==", item.productID).get()
+          .then(productSnapshot => {
+            const productData = productSnapshot.data();
+            setproducts(prevProducts => [...prevProducts, productData]);
+          });
+      })
+    }
+  }, [cartItems]);
+
   return (
     <SwipeListView
-      rightOpenValue={-50}
-      previewRowKey="0"
-      previewOpenValue={-40}
-      previewOpenDelay={3000}
-      data={products}
-      renderItem={renderitem}
+      data={cartItems}
+      renderItem={(data) => renderitem(data, products)}
       renderHiddenItem={hiddenItem}
-      showsVerticalScrollIndindicator={false}
+      showsVerticalScrollIndicator={false}
     />
   );
 };
 
 // Cart Item
-const renderitem = (data) => (
+const renderitem = (data, products) => (
   <Pressable>
     <Box ml={6} mb={3}>
       <HStack
@@ -50,8 +69,8 @@ const renderitem = (data) => (
       >
         <Center w="25%" bg={Colors.deepGray}>
           <Image
-            source={{ uri: data.item.image }}
-            alt={data.item.name}
+            source={{ uri: products.image }}
+            alt={products.name}
             w="full"
             h={24}
             resizeMode="contain"
@@ -59,10 +78,10 @@ const renderitem = (data) => (
         </Center>
         <VStack w="60%" px={2} space={2}>
           <Text isTruncated color={Colors.black} bold fontSize={10}>
-            {data.item.name}
+            {products.name}
           </Text>
           <Text bold color={Colors.lightBlack}>
-            ${data.item.price}
+            {products.price} PLN
           </Text>
         </VStack>
         <Center>
@@ -73,7 +92,7 @@ const renderitem = (data) => (
               color: Colors.white,
             }}
           >
-            5
+            {data.item.quantity}
           </Button>
         </Center>
       </HStack>
@@ -101,7 +120,7 @@ const hiddenItem = () => (
 const CartIterms = () => {
   return (
     <Box mr={6}>
-      <Swiper />
+      <CartList />
     </Box>
   );
 };

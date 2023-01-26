@@ -15,17 +15,19 @@ import NumericInput from "react-native-numeric-input";
 import Buttone from "../Components/Buttone";
 import Review from "../Components/Review";
 import { handleAddToCart } from '../data/Firebase';
+import firebase from 'firebase/app';
+import 'firebase/auth';
 import { useNavigation } from "@react-navigation/native";
 
 function SingleProductScreen({ route }) {
   const [value, setValue] = useState(0);
   const navigation = useNavigation();
   const product = route.params;
-
   const addToCart = async () => {
     const user = await firebase.auth().currentUser;
     if(user){
       await handleAddToCart(product.id, value, user.uid);
+      console.log("SPS proid: "+product.id+" value: "+value+" uuid: "+user.uid);
     }
     else{
       console.log("User not logged in");
@@ -50,6 +52,7 @@ function SingleProductScreen({ route }) {
         <HStack space={2} alignItems="center" my={5}>
             <NumericInput
               value={value}
+              onChange={setValue}
               totalWidth={140}
               totalHeight={30}
               iconSize={25}
@@ -72,7 +75,9 @@ function SingleProductScreen({ route }) {
         </Text>
           <Buttone
           onPress={() => {
-            addToCart();
+            if(value){
+              addToCart();
+            }
             navigation.navigate("Cart");
           }}
           bg={Colors.main}
