@@ -32,7 +32,7 @@ const CartList = (data) => {
     fetchCartItems(user.uid).then(data => {
       setCartItems(data);
     });
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     if (cartItems.length) {

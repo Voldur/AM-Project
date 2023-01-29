@@ -1,44 +1,28 @@
-import { Center, Heading, Image, Text } from "native-base";
-import React, { useEffect, useState } from "react";
+import { Center, Heading, Image, Text, TouchableOpacity, View, Button } from "native-base";
+import React, { useEffect, useState, useRef } from "react";
 import Colors from "../color";
 import Tabs from "../Components/Profile/Tabs";
 import firebase from 'firebase/app';
 import 'firebase/auth';
-import * as ImagePicker from 'expo-image-picker';
-import * as Permissions from 'expo-permissions';
+import { Camera } from 'expo-camera';
+import { updateProfilePicture } from './../data/Firebase'
 
-
-const handleProfilePhoto = async () => {
-  const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
-  if (status === 'granted') {
-    try {
-      let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 1,
-      });
-      if (!result.cancelled) {
-        // update the profile photo in firebase
-        // you can use firebase.storage().ref().put()
-        // or firebase.auth().currentUser.updateProfile({photoURL: result.uri});
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  } else {
-    throw new Error('Permission not granted to access camera roll');
-  }
-};
 
 function ProfileScreen() {
+  const [hasCameraPermission, setHasCameraPermission] = useState(null);
+  const [isCameraVisible, setIsCameraVisible] = useState(false);
+  const [profileImage, setProfileImage] = useState(null);
   const currentUser = firebase.auth().currentUser;
   const [user, setUser] = useState(currentUser);
-  console.log(currentUser);
-  if(currentUser.photoURL = null){
-    currentUser.photoURL = "https://cdn.vox-cdn.com/thumbor/qz69U-p3xQ7BEcfsz9wp-D1PmrI=/0x0:599x399/1400x1400/filters:focal(0x0:599x399):format(jpeg)/cdn.vox-cdn.com/uploads/chorus_image/image/5535551/cnbc_failed_celeb_businesses_hulk.0.jpg";
-  }
-  const photoUrl = "https://cdn.vox-cdn.com/thumbor/qz69U-p3xQ7BEcfsz9wp-D1PmrI=/0x0:599x399/1400x1400/filters:focal(0x0:599x399):format(jpeg)/cdn.vox-cdn.com/uploads/chorus_image/image/5535551/cnbc_failed_celeb_businesses_hulk.0.jpg";
+  const [displayName, setDisplayName] = useState(currentUser.displayName);
+  let cameraRef = useRef(null);
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await Camera.requestCameraPermissionsAsync();
+      setHasCameraPermission(status === 'granted');
+    })();
+  }, []);
 
   useEffect(() => {
     const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
@@ -51,27 +35,115 @@ function ProfileScreen() {
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    setDisplayName(currentUser.displayName);
+  }, [currentUser.displayName]);
+
+  const handleTakePicture = async () => {
+    if (cameraRef.current) {
+      let photo = await cameraRef.current.takePictureAsync();
+      setProfileImage(photo.uri);
+      setIsCameraVisible(false);
+      // Save image to Firebase Storage
+      const response = await fetch(photo.uri);
+      const blob = await response.blob();
+      var ref = firebase.storage().ref().child("images/" + new Date().getTime() + ".jpg");
+      ref.put(blob).then(function () {
+        ref.getDownloadURL().then(function (downloadURL) {
+          var user = firebase.auth().currentUser;
+          user.updateProfile({
+            photoURL: downloadURL
+          }).then(function () {
+            console.log("Profile updated successfully with new profile picture");
+          }).catch(function (error) {
+            console.log("Error updating profile: " + error.message);
+          });
+        });
+      });
+
+    }
+  }
+
   return (
     <>
-      <Center bg={Colors.main} pt={10} pb={6}>
-        <Image
-          source={{ uri: photoUrl }}
-          alt="profile"
-          w={24}
-          h={24}
-          borderRadius={100}
-          resizeMode="cover"
-          onPress={handleProfilePhoto}
-        />
-        <Heading bold fontSize={15} isTruncated my={2} color={Colors.white}>
-          {currentUser.displayName}
-        </Heading>
-        <Text italic fontSize={10} color={Colors.white}>
-          Joined {currentUser.metadata.creationTime}
-        </Text>
-      </Center>
-      {/* TABS */}
-      <Tabs />
+      {/* Render the camera component */}
+      {isCameraVisible && (
+        <Camera
+          ref={cameraRef}
+          style={{ flex: 1 }}
+          type={Camera.Constants.Type.back}
+        >
+          <View style={{ flex: 1, backgroundColor: 'transparent', flexDirection: 'column-reverse', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: 300, height: 50 }}>
+              <Button
+                style={{
+                  flex: 0.1,
+                  alignSelf: 'flex-end',
+                  alignItems: 'center',
+                }}
+                onPress={handleTakePicture}
+              >
+                <Text style={{ fontSize: 14, marginBottom: 5, color: 'white', width: 45 }}> Snap </Text>
+              </Button>
+              <Button
+                style={{
+                  flex: 0.1,
+                  alignSelf: 'flex-end',
+                  alignItems: 'center',
+                }}
+                onPress={() => setIsCameraVisible(false)}
+              >
+                <Text style={{ fontSize: 14, marginBottom: 5, color: 'white', width: 47 }}> Close </Text>
+              </Button>
+            </View>
+          </View>
+
+
+        </Camera>
+      )}
+      {/* Render the rest of the components */}
+      {!isCameraVisible && (
+        <>
+          <Center bg={Colors.main} pt={10} pb={6}>
+            {profileImage ? (
+              <Image
+                source={{ uri: profileImage }}
+                alt="profile"
+                w={24}
+                h={24}
+                borderRadius={100}
+                resizeMode="cover"
+              />
+            ) : (
+              <Image
+                source={{ uri: currentUser.photoURL }}
+                alt="profile"
+                w={24}
+                h={24}
+                borderRadius={100}
+                resizeMode="cover"
+              />
+            )}
+            <Button
+              _pressed={{
+                bg: Colors.main,
+              }}
+              bg={Colors.main}
+              onPress={() => setIsCameraVisible(true)}
+            >
+              EDIT
+            </Button>
+            <Heading bold fontSize={15} isTruncated my={2} color={Colors.white}>
+              {displayName}
+            </Heading>
+            <Text italic fontSize={10} color={Colors.white}>
+              Joined {currentUser.metadata.creationTime}
+            </Text>
+          </Center>
+          <Tabs />
+        </>
+      )
+      }
     </>
   );
 }

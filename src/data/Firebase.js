@@ -4,6 +4,8 @@ import 'firebase/database';
 import { doc, setDoc, addDoc, collection } from 'firebase/firestore';
 import 'firebase/firestore';
 import React, { useState, useEffect } from "react";
+import 'firebase/storage';
+
 
 const firebaseConfig = {
   apiKey: "AIzaSyAxuiWq9FeGiH7ZqrzWOZ9iSa-IR_YBTSc",
@@ -19,37 +21,38 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 export const cartsRef = db.collection('cart');
 export const productsRef = db.collection('product');
+export const storage = firebase.storage();
 
 
-export const handleLogin = async (email,password) => {
-    try {
-      await firebase.auth().signInWithEmailAndPassword(email, password);
-    } catch (error) {
-      console.log(error)
-      return error.message
-    }
+export const handleLogin = async (email, password) => {
+  try {
+    await firebase.auth().signInWithEmailAndPassword(email, password);
+  } catch (error) {
+    console.log(error)
+    return error.message
   }
+}
 
-  export const handleRegister = async (email,password,username) => {
-    try {
-        const signInMethods = await firebase.auth().fetchSignInMethodsForEmail(email);
-        if (signInMethods.length) {
-            throw new Error("Email already in use.");
-        }
-        const { user } = await firebase.auth().createUserWithEmailAndPassword(email, password);
-        await user.updateProfile({ displayName: username });
-        await user.updateProfile({ photoURL: "https://cdn.vox-cdn.com/thumbor/qz69U-p3xQ7BEcfsz9wp-D1PmrI=/0x0:599x399/1400x1400/filters:focal(0x0:599x399):format(jpeg)/cdn.vox-cdn.com/uploads/chorus_image/image/5535551/cnbc_failed_celeb_businesses_hulk.0.jpg" });
-    } catch (error) {
-      return error.message
+export const handleRegister = async (email, password, username) => {
+  try {
+    const signInMethods = await firebase.auth().fetchSignInMethodsForEmail(email);
+    if (signInMethods.length) {
+      throw new Error("Email already in use.");
     }
+    const { user } = await firebase.auth().createUserWithEmailAndPassword(email, password);
+    await user.updateProfile({ displayName: username });
+    await user.updateProfile({ photoURL: "https://cdn.vox-cdn.com/thumbor/qz69U-p3xQ7BEcfsz9wp-D1PmrI=/0x0:599x399/1400x1400/filters:focal(0x0:599x399):format(jpeg)/cdn.vox-cdn.com/uploads/chorus_image/image/5535551/cnbc_failed_celeb_businesses_hulk.0.jpg" });
+  } catch (error) {
+    return error.message
   }
+}
 
 export const fetchProducts = async () => {
-    let products = [];
-    await productsRef.get().then((querySnapshot) => {
-      querySnapshot.forEach((doc) => {
-          products.push(doc.data());
-      });
+  let products = [];
+  await productsRef.get().then((querySnapshot) => {
+    querySnapshot.forEach((doc) => {
+      products.push(doc.data());
+    });
   });
   return products;
 }
@@ -59,7 +62,7 @@ export const fetchCartItems = async (userUID) => {
   const querySnapshot = await db.collection("cart").where("userUID", "==", userUID).get();
   querySnapshot.forEach((doc) => {
     cartItems.push(doc.data());
-  });       
+  });
   return cartItems;
 }
 
@@ -82,7 +85,7 @@ export const useAuth = () => {
 }
 
 export const handleAddToCart = async (productID, quantity, userUID) => {
-  console.log("Fire proid: "+productID+" value: "+quantity+" uuid: "+userUID);
+  console.log("Fire proid: " + productID + " value: " + quantity + " uuid: " + userUID);
 
   db.collection("cart")
     .where("productID", "==", productID)
@@ -101,16 +104,25 @@ export const handleAddToCart = async (productID, quantity, userUID) => {
           quantity: quantity,
           userUID: userUID
         })
-        .then(() => {
-          console.log("Document Created")
-        })
-        .catch((error) => {
-          console.log(error.message)
-        });
+          .then(() => {
+            console.log("Document Created")
+          })
+          .catch((error) => {
+            console.log(error.message)
+          });
       }
     });
-};
+}
 
+export const updateProfilePicture = async (userId, imageUri) => {
+  const storageRef = storage.ref();
+  const userImagesRef = storageRef.child(`userImages/${userId}`);
+  const imageRef = userImagesRef.child(`profile_picture.jpg`);
+  const response = await fetch(imageUri);
+  const blob = await response.blob();
+  const snapshot = await imageRef.put(blob);
+  return snapshot.ref.getDownloadURL();
+};
 
 
 export default firebase;          

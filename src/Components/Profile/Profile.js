@@ -36,26 +36,35 @@ const Profile = () => {
 
 
   const handleUpdateProfile = async () => {
-    if (newPassword !== confirmPassword) {
-      setErrorMessage("Passwords do not match");
-      return;
-    }
+    const user = firebase.auth().currentUser;
+    let error = "";
     try {
-      const user = firebase.auth().currentUser;
-      await user.updateProfile({ displayName: username });
-      await user.updateEmail(email);
-      if (newPassword) {
-        await user.updatePassword(newPassword);
+      // Check if email is valid
+      if (email) {
+        if (!email.includes("@")) {
+          error = "Wrong email or password";
+        } else {
+          await user.updateEmail(email);
+        }
       }
-      await db.collection("users").doc(user.uid).set({
-        displayName: username,
-        email: email,
-      });
-      setErrorMessage("");
-    } catch (error) {
-      setErrorMessage(error.message);
+      // Check if passwords match
+      if (newPassword) {
+        if (newPassword !== confirmPassword) {
+          error = "Wrong email or password";
+        } else {
+          await user.updatePassword(newPassword);
+        }
+      }
+      if (username) {
+        await user.updateProfile({ displayName: username });
+      }
+      
+    } catch (e) {
+      error = e.message;
     }
+    setErrorMessage(error);
   };
+
 
 
   return (
@@ -84,10 +93,10 @@ const Profile = () => {
                   i.label === "USERNAME"
                     ? (text) => setUsername(text)
                     : i.label === "EMAIL"
-                    ? (text) => setEmail(text)
-                    : i.label === "NEW PASSWORD"
-                    ? (text) => setNewPassword(text)
-                    : (text) => setConfirmPassword(text)
+                      ? (text) => setEmail(text)
+                      : i.label === "NEW PASSWORD"
+                        ? (text) => setNewPassword(text)
+                        : (text) => setConfirmPassword(text)
                 }
                 _focus={{
                   bg: Colors.lightGray,
