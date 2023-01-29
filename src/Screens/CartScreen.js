@@ -1,13 +1,69 @@
+import React, { useState, useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { Box, Button, Center, HStack, ScrollView, Text } from "native-base";
-import React, { useState } from "react";
 import Colors from "../color";
 import Buttone from "../Components/Buttone";
 // import CartEmpty from "../Components/CartEmpty";
 import CartIterms from "../Components/CartIterms";
+import { cartsRef, fetchCartItems, fetchProducts } from "../data/Firebase";
+import firebase from 'firebase/app';
+import 'firebase/auth';
+import 'firebase/database';
+import 'firebase/firestore';
 
 function CartScreen() {
   const navigation = useNavigation();
+  const currentUser = firebase.auth().currentUser;
+  const [user, setUser] = useState(currentUser);
+  const [cartItems, setCartItems] = useState([]);
+  const [products, setproducts] = useState([]);
+  const [totalPrice, setTotalPrice] = useState(0);
+
+  useEffect(() => {
+    fetchCartItems(user.uid).then(data => {
+      setCartItems(data);
+    });
+  }, [user]);
+
+  useEffect(() => {
+    if (cartItems.length) {
+      console.log(cartItems);
+      let total = 0;
+      let productsData = []
+      cartItems.map(item => {
+        firebase.firestore().collection('product').where("id", "==", item.productID).get()
+          .then(productSnapshot => {
+            productSnapshot.forEach(product => {
+              const productData = {
+                productID: product.data().productID,
+                price: product.data().price,
+                quantity: item.quantity
+              }
+              console.log(productData);
+              productsData.push(productData);
+              total += productData.price * productData.quantity;
+              console.log("TOTAL: " + total);
+            });
+            setTotalPrice(total);
+            setproducts(productsData);
+          });
+      });
+    }
+  }, [cartItems]);
+  
+
+/*
+  const calculateTotalPrice = () => {
+    let total = 0;
+    console.log("TOTAL: " + total);
+    products.forEach((products) => {
+      total += products.price * products.quantity;
+      console.log("TOTAL: " + total);
+    });
+    setTotalPrice(total);
+  };*/
+
+
   return (
     <Box flex={1} safeAreaTop bg={Colors.lightGray}>
       {/* Header */}
@@ -20,7 +76,7 @@ function CartScreen() {
       <CartEmpty /> */}
       {/* CART ITEMS */}
       <ScrollView showsVerticalScrollIndicator={false}>
-        <CartIterms />
+        <CartIterms products={products} />
         {/* Total */}
         <Center mt={5}>
           <HStack
@@ -47,7 +103,7 @@ function CartScreen() {
                 bg: Colors.main,
               }}
             >
-              356 PLN
+              {totalPrice} PLN
             </Button>
           </HStack>
         </Center>

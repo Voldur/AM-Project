@@ -36,20 +36,32 @@ const CartList = (data) => {
 
   useEffect(() => {
     if (cartItems.length) {
+      console.log(cartItems);
+      let productsData = []
       cartItems.map(item => {
         firebase.firestore().collection('product').where("id", "==", item.productID).get()
           .then(productSnapshot => {
-            const productData = productSnapshot.data();
-            setproducts(prevProducts => [...prevProducts, productData]);
+            productSnapshot.forEach(product => {
+              const productData = {
+                id: product.id,
+                name: product.data().name,
+                image: product.data().image,
+                price: product.data().price,
+                quantity: item.quantity
+              }
+              productsData.push(productData);
+            });
+            setproducts(productsData);
           });
-      })
+      });
     }
   }, [cartItems]);
 
+
   return (
     <SwipeListView
-      data={cartItems}
-      renderItem={(data) => renderitem(data, products)}
+      data={products}
+      renderItem={(data) => renderitem(data)}
       renderHiddenItem={hiddenItem}
       showsVerticalScrollIndicator={false}
     />
@@ -69,8 +81,8 @@ const renderitem = (data, products) => (
       >
         <Center w="25%" bg={Colors.deepGray}>
           <Image
-            source={{ uri: products.image }}
-            alt={products.name}
+            source={{ uri: data.item.image }}
+            alt={data.item.name}
             w="full"
             h={24}
             resizeMode="contain"
@@ -78,10 +90,10 @@ const renderitem = (data, products) => (
         </Center>
         <VStack w="60%" px={2} space={2}>
           <Text isTruncated color={Colors.black} bold fontSize={10}>
-            {products.name}
+            {data.item.name}
           </Text>
           <Text bold color={Colors.lightBlack}>
-            {products.price} PLN
+            {data.item.price} PLN
           </Text>
         </VStack>
         <Center>
