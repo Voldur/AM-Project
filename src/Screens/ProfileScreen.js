@@ -15,6 +15,8 @@ function ProfileScreen() {
   const currentUser = firebase.auth().currentUser;
   const [user, setUser] = useState(currentUser);
   const [displayName, setDisplayName] = useState(currentUser.displayName);
+  let options = {year: "2-digit", month: "2-digit", day: "2-digit"};
+  const creationDate = new Date(currentUser.metadata.creationTime).toLocaleDateString('de-DE', options).replace(/\//g, '.');
   let cameraRef = useRef(null);
 
   useEffect(() => {
@@ -137,7 +139,7 @@ function ProfileScreen() {
               {displayName}
             </Heading>
             <Text italic fontSize={10} color={Colors.white}>
-              Joined {currentUser.metadata.creationTime}
+              Joined {creationDate}
             </Text>
           </Center>
           <Tabs />

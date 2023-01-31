@@ -11,6 +11,7 @@ import 'firebase/auth';
 import 'firebase/database';
 import 'firebase/firestore';
 
+
 function CartScreen() {
   const navigation = useNavigation();
   const currentUser = firebase.auth().currentUser;
@@ -20,10 +21,21 @@ function CartScreen() {
   const [totalPrice, setTotalPrice] = useState(0);
 
   useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      fetchCartItems(user.uid).then(data => {
+        setCartItems(data);
+      });
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+
+  useEffect(() => {
     fetchCartItems(user.uid).then(data => {
       setCartItems(data);
     });
-  }, [user]);
+  }, []);
+  
 
   useEffect(() => {
     if (cartItems.length) {
@@ -87,7 +99,7 @@ function CartScreen() {
                 bg: Colors.main,
               }}
             >
-              {totalPrice} PLN
+              {totalPrice.toFixed(2)} PLN
             </Button>
           </HStack>
         </Center>

@@ -56,7 +56,6 @@ const CartList = (data) => {
     }
   }, [cartItems]);
 
-
   return (
     <SwipeListView
       data={products}

@@ -30,7 +30,12 @@ function ShippingScreen() {
   const [country, setCountry] = useState('');
   const [postalCode, setPostalCode] = useState('');
   const [address, setAddress] = useState('');
+  
   const handleAddShippingData = async () => {
+    if (!city || !country || !postalCode || !address) {
+      alert('Please fill all the fields');
+      return;
+    }
     const data = {
       city,
       country,
@@ -40,6 +45,7 @@ function ShippingScreen() {
     addShippingData(data);
     navigation.navigate("Checkout");
   };
+  
 
   return (
     <Box flex={1} safeAreaTop bg={Colors.main} py={5}>

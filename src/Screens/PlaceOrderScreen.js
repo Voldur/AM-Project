@@ -19,7 +19,7 @@ function PlaceOrderScreen() {
   const [cartItems, setCartItems] = useState([]);
   const [products, setproducts] = useState([]);
   const [shippingData, setShippingData] = useState({});
-const [paymentMethod, setPaymentMethod] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('');
 
   useEffect(() => {
     fetchCartItems(user.uid).then(data => {
@@ -51,17 +51,15 @@ const [paymentMethod, setPaymentMethod] = useState('');
   }, [cartItems]);
 
   useEffect(() => {
-    console.log("TU ZACZYNA");
     if (user) {
       const shippingRef = firebase.firestore().collection('shipping').where("userUID", "==", user.uid);
       const paymentsRef = firebase.firestore().collection('payments').where("userUID", "==", user.uid);
-      console.log("TU: "+shippingRef);
       shippingRef.orderBy("date", "desc").limit(1).get()
         .then(shippingSnapshot => {
-          console.log("TU: "+shippingSnapshot.date);
           if (!shippingSnapshot.empty) {
             shippingSnapshot.forEach(shipping => {
               setShippingData(shipping.data());
+              console.log(shipping.data());
             });
           }
         });
@@ -70,11 +68,11 @@ const [paymentMethod, setPaymentMethod] = useState('');
           if (!paymentSnapshot.empty) {
             paymentSnapshot.forEach(payment => {
               setPaymentMethod(payment.data().paymentMethod);
+              console.log(payment.data());
             });
           }
         });
     }
-    console.log("TU KONCZY");
   }, [user]);
 
   return (
@@ -102,7 +100,7 @@ const [paymentMethod, setPaymentMethod] = useState('');
           <OrderInfo
             title="DELIVER TO"
             subTitle="Address:"
-            text="Sosnowiec, Dziurowiso 23, P.O BOX 1234"
+            text={`${shippingData.city}, ${shippingData.address}, ${shippingData.postalCode}`}
             icon={
               <Ionicons name="location-sharp" size={30} color={Colors.white} />
             }

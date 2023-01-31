@@ -85,7 +85,6 @@ export const useAuth = () => {
 }
 
 export const handleAddToCart = async (productID, quantity, userUID) => {
-  console.log("Fire proid: " + productID + " value: " + quantity + " uuid: " + userUID);
 
   db.collection("cart")
     .where("productID", "==", productID)

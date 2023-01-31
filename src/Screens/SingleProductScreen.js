@@ -27,7 +27,6 @@ function SingleProductScreen({ route }) {
     const user = await firebase.auth().currentUser;
     if(user){
       await handleAddToCart(product.id, value, user.uid);
-      console.log("SPS proid: "+product.id+" value: "+value+" uuid: "+user.uid);
     }
     else{
       console.log("User not logged in");
