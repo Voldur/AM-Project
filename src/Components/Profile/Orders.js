@@ -19,10 +19,11 @@ const Orders = () => {
         .collection("orders")
         .where("userUID", "==", userUID)
         .get();
-        console.log(snapshot.id);
       setOrders(
         snapshot.docs.map((doc) => {
           let order = doc.data();
+          let orderUid = doc;
+          console.log(orderUid);
           order.creationDate = new Date(order.creationDate.toDate()).toLocaleDateString("en-US", options);
           return order;
         })

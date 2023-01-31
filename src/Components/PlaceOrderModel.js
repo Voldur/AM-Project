@@ -94,7 +94,7 @@ const PlaceOrderModel = () => {
                     color={i.color === "main" ? Colors.main : Colors.black}
                     bold
                   >
-                    ${i.price}
+                    {i.price} PLN
                   </Text>
                 </HStack>
               ))}

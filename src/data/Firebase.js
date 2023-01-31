@@ -18,6 +18,7 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
+
 const db = firebase.firestore();
 export const cartsRef = db.collection('cart');
 export const productsRef = db.collection('product');

@@ -25,10 +25,25 @@ function CartScreen() {
       fetchCartItems(user.uid).then(data => {
         setCartItems(data);
       });
-    });
+    }); 
 
     return unsubscribe;
   }, [navigation]);
+
+
+  useEffect(() => {
+    const unsubscribe = firebase.firestore().collection('product').onSnapshot(snapshot => {
+      snapshot.docChanges().forEach(change => {
+        if (change.type === 'added' || change.type === 'modified') {
+          setproducts(prevProducts => [...prevProducts, change.doc.data()]);
+        }
+      });
+    });
+  
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
     fetchCartItems(user.uid).then(data => {
