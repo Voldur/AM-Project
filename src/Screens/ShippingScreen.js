@@ -1,16 +1,9 @@
+import React, { useState } from 'react';
 import { useNavigation } from "@react-navigation/native";
-import {
-  Box,
-  Center,
-  FormControl,
-  Input,
-  ScrollView,
-  Text,
-  VStack,
-} from "native-base";
-import React from "react";
+import { Box, Center, FormControl, Input, ScrollView, Text, VStack } from "native-base";
 import Colors from "../color";
 import Buttone from "../Components/Buttone";
+import { addShippingData } from './../data/Firebase';
 
 const ShippingInputs = [
   {
@@ -33,15 +26,28 @@ const ShippingInputs = [
 
 function ShippingScreen() {
   const navigation = useNavigation();
+  const [city, setCity] = useState('');
+  const [country, setCountry] = useState('');
+  const [postalCode, setPostalCode] = useState('');
+  const [address, setAddress] = useState('');
+  const handleAddShippingData = async () => {
+    const data = {
+      city,
+      country,
+      postalCode,
+      address
+    };
+    addShippingData(data);
+    navigation.navigate("Checkout");
+  };
+
   return (
     <Box flex={1} safeAreaTop bg={Colors.main} py={5}>
-      {/* Header */}
       <Center pb={15}>
         <Text color={Colors.white} fontSize={14} bold>
           DELIVERY ADDRESS
         </Text>
       </Center>
-      {/* Inputs */}
       <Box h="full" bg={Colors.white} px={5}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <VStack space={6} mt={5}>
@@ -56,6 +62,8 @@ function ShippingScreen() {
                   {i.label}
                 </FormControl.Label>
                 <Input
+                  value={i.label === 'ENTER CITY' ? city : i.label === 'ENTER COUNTRY' ? country : i.label === 'ENTER POSTAL CODE' ? postalCode : address}
+                  onChangeText={i.label === 'ENTER CITY' ? text => setCity(text) : i.label === 'ENTER COUNTRY' ? text => setCountry(text) : i.label === 'ENTER POSTAL CODE' ? text => setPostalCode(text) : text => setAddress(text)}
                   borderWidth={0.2}
                   borderColor={Colors.main}
                   bg={Colors.lightGray}
@@ -71,7 +79,7 @@ function ShippingScreen() {
               </FormControl>
             ))}
             <Buttone
-              onPress={() => navigation.navigate("Checkout")}
+              onPress={() => handleAddShippingData()}
               bg={Colors.main}
               color={Colors.white}
               mt={5}

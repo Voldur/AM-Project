@@ -1,21 +1,4 @@
-/*import firebase from 'firebase/app';
-import 'firebase/database';
-
-const firebaseConfig = {
-  apiKey: "AIzaSyAxuiWq9FeGiH7ZqrzWOZ9iSa-IR_YBTSc",
-  authDomain: "scamonline-d6d49.firebaseapp.com",
-  projectId: "scamonline-d6d49",
-  storageBucket: "scamonline-d6d49.appspot.com",
-  messagingSenderId: "840314796661",
-  appId: "1:840314796661:web:94a81659c9b1ac0445d63c"
-};
-
-firebase.initializeApp(firebaseConfig);
-
-const productsRef = firebase.database().ref('product');
-
-
-
+/*
 const products = [
   {
     _id: "1",

@@ -3,7 +3,7 @@ import React from "react";
 import Colors from "../color";
 import OrderInfo from "../Components/OrderInfo";
 import { FontAwesome5, Ionicons } from "@expo/vector-icons";
-import OrderIterm from "../Components/OrderIterm";
+import OrderItem from "../Components/OrderItem";
 import OrderModel from "../Components/OrderModel";
 
 function OrderScreen() {
@@ -40,7 +40,7 @@ function OrderScreen() {
         <Heading bold fontSize={15} isTruncated my={4}>
           PRODUCTS
         </Heading>
-        <OrderIterm />
+        <OrderItem />
         {/* Total */}
         <OrderModel />
       </Box>

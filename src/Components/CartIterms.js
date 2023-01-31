@@ -36,7 +36,6 @@ const CartList = (data) => {
 
   useEffect(() => {
     if (cartItems.length) {
-      console.log(cartItems);
       let productsData = []
       cartItems.map(item => {
         firebase.firestore().collection('product').where("id", "==", item.productID).get()

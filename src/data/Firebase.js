@@ -114,6 +114,39 @@ export const handleAddToCart = async (productID, quantity, userUID) => {
     });
 }
 
+export const addShippingData = (data) => {
+  const user = firebase.auth().currentUser;
+  const uid = user.uid;
+  const date = new Date();
+  db.collection("shipping").add({
+      country: data.country,
+      city: data.city,
+      postalCode: data.postalCode,
+      address: data.address,
+      userUID: uid,
+      date: date
+    })
+    .then(() => console.log("Shipping data added successfully"))
+    .catch((error) => console.error("Error adding shipping data: ", error));
+};
+
+export function addPaymentMethod(paymentMethod) {
+  const user = firebase.auth().currentUser;
+  const uid = user.uid;
+  const date = new Date();
+  db.collection("payments").add({
+    paymentMethod: paymentMethod,
+    userUID: uid,
+    date: date
+  })
+    .then(function(docRef) {
+      console.log("Payment method added with ID: ", docRef.id);
+    })
+    .catch(function(error) {
+      console.error("Error adding payment method: ", error);
+    });
+}
+
 export const updateProfilePicture = async (userId, imageUri) => {
   const storageRef = storage.ref();
   const userImagesRef = storageRef.child(`userImages/${userId}`);

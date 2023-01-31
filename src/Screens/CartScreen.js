@@ -27,7 +27,6 @@ function CartScreen() {
 
   useEffect(() => {
     if (cartItems.length) {
-      console.log(cartItems);
       let total = 0;
       let productsData = []
       cartItems.map(item => {
@@ -39,10 +38,8 @@ function CartScreen() {
                 price: product.data().price,
                 quantity: item.quantity
               }
-              console.log(productData);
               productsData.push(productData);
               total += productData.price * productData.quantity;
-              console.log("TOTAL: " + total);
             });
             setTotalPrice(total);
             setproducts(productsData);
@@ -50,19 +47,6 @@ function CartScreen() {
       });
     }
   }, [cartItems]);
-  
-
-/*
-  const calculateTotalPrice = () => {
-    let total = 0;
-    console.log("TOTAL: " + total);
-    products.forEach((products) => {
-      total += products.price * products.quantity;
-      console.log("TOTAL: " + total);
-    });
-    setTotalPrice(total);
-  };*/
-
 
   return (
     <Box flex={1} safeAreaTop bg={Colors.lightGray}>
